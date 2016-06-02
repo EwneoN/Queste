@@ -8,14 +8,14 @@ using FluentAssertions;
 namespace Queste.Test
 {
 
-  public class UnitTest1
+  public class ExpressionTests
   {
     [Theory]
     [InlineData(10,10)]
     [InlineData(100, 10)]
     [InlineData(1000, 100)]
     [InlineData(10000, 100)]
-    public void TestMethod1(int collectionSize, int maxSubCollectionSize)
+    public void DateTimeListTest(int collectionSize, int maxSubCollectionSize)
     {
       var kvps = new KeyValuePair<string, List<DateTime>>[collectionSize];
 
@@ -56,11 +56,13 @@ namespace Queste.Test
       string queryString = $"value={kvps[rand.Next(0, collectionSize - 1)].Value[0]}%2B" +
                            $"{kvps[rand.Next(0, collectionSize - 1)].Value[0]}";
 
+      IQueryable<KeyValuePair<string, List<DateTime>>> queryable = kvps.AsQueryable();
+
       var sw = Stopwatch.StartNew();
 
-      var expression = ExpressionBuilder.Build<KeyValuePair<string, List<DateTime>>>(queryString);
+      var expression = ExpressionBuilder.BuildExpression<KeyValuePair<string, List<DateTime>>>(queryString);
 
-      kvps.AsQueryable().Where(expression).Should().NotBeNullOrEmpty();
+      queryable.Where(expression).Should().NotBeNullOrEmpty();
 
       sw.Stop();
     }
@@ -72,7 +74,7 @@ namespace Queste.Test
     [InlineData(10000)]
     [InlineData(100000)]
     [InlineData(1000000)]
-    public void TestMethod2(int collectionSize)
+    public void DateTimeTest(int collectionSize)
     {
       var kvps = new KeyValuePair<string, DateTime>[collectionSize];
 
@@ -104,11 +106,13 @@ namespace Queste.Test
       string queryString = $"value={kvps[rand.Next(0, collectionSize - 1)].Value}%2B" +
                            $"{kvps[rand.Next(0, collectionSize - 1)].Value}";
 
+      IQueryable<KeyValuePair<string, DateTime>> queryable = kvps.AsQueryable();
+
       var sw = Stopwatch.StartNew();
 
-      var expression = ExpressionBuilder.Build<KeyValuePair<string, DateTime>>(queryString);
+      var expression = ExpressionBuilder.BuildExpression<KeyValuePair<string, DateTime>>(queryString);
 
-      kvps.AsQueryable().Where(expression).Should().NotBeNullOrEmpty();
+      queryable.Where(expression).Should().NotBeNullOrEmpty();
 
       sw.Stop();
     }
@@ -120,7 +124,7 @@ namespace Queste.Test
     [InlineData(10000)]
     [InlineData(100000)]
     [InlineData(1000000)]
-    public void TestMethod3(int collectionSize)
+    public void IntTest(int collectionSize)
     {
       var kvps = new KeyValuePair<string, int>[collectionSize];
 
@@ -136,11 +140,13 @@ namespace Queste.Test
       string queryString = $"value={kvps[rand1.Next(0, collectionSize - 1)].Value}%2B" +
                            $"{kvps[rand1.Next(0, collectionSize - 1)].Value}";
 
+      IQueryable<KeyValuePair<string, int>> queryable = kvps.AsQueryable();
+
       var sw = Stopwatch.StartNew();
 
-      var expression = ExpressionBuilder.Build<KeyValuePair<string, int>>(queryString);
+      var expression = ExpressionBuilder.BuildExpression<KeyValuePair<string, int>>(queryString);
 
-      kvps.AsQueryable().Where(expression).Should().NotBeNullOrEmpty();
+      queryable.Where(expression).Should().NotBeNullOrEmpty();
 
       sw.Stop();
     }
@@ -152,7 +158,7 @@ namespace Queste.Test
     [InlineData(10000)]
     [InlineData(100000)]
     [InlineData(1000000)]
-    public void TestMethod4(int collectionSize)
+    public void StringTest(int collectionSize)
     {
       var kvps = new KeyValuePair<string, string>[collectionSize];
 
@@ -166,11 +172,13 @@ namespace Queste.Test
       string queryString = $"value={kvps[rand1.Next(0, collectionSize - 1)].Value}%2B" +
                            $"{kvps[rand1.Next(0, collectionSize - 1)].Value}";
 
+      IQueryable<KeyValuePair<string, string>> queryable = kvps.AsQueryable();
+
       var sw = Stopwatch.StartNew();
 
-      var expression = ExpressionBuilder.Build<KeyValuePair<string, string>>(queryString);
+      var expression = ExpressionBuilder.BuildExpression<KeyValuePair<string, string>>(queryString);
 
-      kvps.AsQueryable().Where(expression).Should().NotBeNullOrEmpty();
+      queryable.Where(expression).Should().NotBeNullOrEmpty();
 
       sw.Stop();
     }
