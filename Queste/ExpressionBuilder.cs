@@ -10,6 +10,8 @@ namespace Queste
 {
   public static class ExpressionBuilder
   {
+    #region Public Methods
+
     /// <summary>
     /// Takes URL encoded query string and creates a dynamic Linq expression.
     /// </summary>
@@ -22,6 +24,9 @@ namespace Queste
       {
         return null;
       }
+
+      queryString = queryString.Replace("%3d", "=");
+      queryString = queryString.Replace("+", "%2B");
 
       NameValueCollection queryStringPairs = HttpUtility.ParseQueryString(queryString);
       ParameterExpression parameter = Expression.Parameter(typeof(TSource), "p");
@@ -60,9 +65,9 @@ namespace Queste
           {
             Type iEnumerableType = propertyInterfaces.FirstOrDefault(isIEnumerableFunc);
             Type itemType = iEnumerableType?.GetGenericArguments()[0];
-            
+
             //if for whatever reason we have failed to get an element type just return null
-            if(itemType == null)
+            if (itemType == null)
             {
               return (Expression)null;
             }
@@ -102,7 +107,7 @@ namespace Queste
 
             // .Any(e == values[0] || e == values[1] || e == values[2])
             // .Any(e.ToString() == values[0] || e.ToString() == values[1] || e.ToString() == values[2])
-            return Expression.Call(typeof(Enumerable), nameof(Enumerable.Any), new [] { itemType }, property, 
+            return Expression.Call(typeof(Enumerable), nameof(Enumerable.Any), new[] { itemType }, property,
               Expression.Lambda(func, or, item));
           }
 
@@ -169,6 +174,10 @@ namespace Queste
       return BuildExpression<TSource>(queryString).Compile();
     }
 
+    #endregion
+
+    #region Private Methods
+
     private static BinaryExpression BuildEqualExpression(Type type, string queryValue,
       MemberExpression propertyExpression, MethodCallExpression toStringExpression)
     {
@@ -220,5 +229,7 @@ namespace Queste
 
       return Expression.Equal(parameterValueExpression, valueExpression);
     }
+
+    #endregion
   }
 }

@@ -1,0 +1,19 @@
+stages:
+  - build
+
+job:
+  stage: build
+  script:
+  - set MSBUILDDISABLENODEREUSE=1
+  - ''
+  - echo "Restoring NuGet Packages..."
+  - '"c:\nuget\nuget.exe" restore "Queste.sln"'
+  - ''
+  - echo "Release build..."
+  - '"C:\Program Files (x86)\MSBuild\14.0\Bin\msbuild.exe" /consoleloggerparameters:ErrorsOnly /maxcpucount /nologo /property:Configuration=Release /verbosity:quiet /m:4 /nr:false "Queste.sln"'
+  - ''
+  - echo "Running Tests"
+  - '"C:\xunit\xunit.console.exe" ".\Queste.Test\bin\Release\Queste.Test.dll"'
+  tags: 
+  except:
+  - tags
