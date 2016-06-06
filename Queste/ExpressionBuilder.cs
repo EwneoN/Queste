@@ -171,7 +171,7 @@ namespace Queste
     /// <returns>A basic function for use in linq queries like Where, First, FirstOrDefault, Any, or All.</returns>
     public static Func<TSource, bool> BuildFunction<TSource>(string queryString)
     {
-      return BuildExpression<TSource>(queryString).Compile();
+      return BuildExpression<TSource>(queryString)?.Compile();
     }
 
     #endregion
