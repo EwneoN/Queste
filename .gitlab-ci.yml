@@ -1,22 +1,38 @@
 stages:
   - build
   - test
-job:
+  - cleanup_build
+  
+build_job:
   stage: build
   script:
-  - set MSBUILDDISABLENODEREUSE=1
-  - ''
-  - echo "Restoring NuGet Packages..."
-  - '"c:\nuget\nuget.exe" restore "Queste.sln"'
-  - ''
-  - echo "Release build..."
-  - '"C:\Program Files (x86)\MSBuild\14.0\Bin\msbuild.exe" /consoleloggerparameters:ErrorsOnly /maxcpucount /nologo /property:Configuration=Release /verbosity:quiet /m:4 /nr:false "Queste.sln"'
-  - echo "Build completed"
+    - set MSBUILDDISABLENODEREUSE=1
+    - ''
+    - echo "Restoring NuGet Packages..."
+    - '"c:\nuget\nuget.exe" restore "Queste.sln"'
+    - echo "NuGet Packages restored"
+    - ''
+    - echo "Release build..."
+    - '"C:\Program Files (x86)\MSBuild\14.0\Bin\msbuild.exe" /consoleloggerparameters:ErrorsOnly /maxcpucount /nologo /property:Configuration=Release /verbosity:quiet /m:4 /nr:false "Queste.sln"'
+    - echo "Build completed"
+
+cleanup_build_job:
+  stage: cleanup_build
+  script:
+    - DEL /Q ".\Queste\bin"
+    - DEL /Q ".\Queste.Test\bin"
+  when: on_failure
+
+test_job:
   stage: test
   script:
-  - echo "Running Tests"
-  - '"C:\xunit\xunit.console.exe" ".\Queste.Test\bin\Release\Queste.Test.dll"'
-  - echo "Tests complete"
+    - echo "Running Tests..."
+    - '"C:\xunit\xunit.console.exe" ".\Queste.Test\bin\Release\Queste.Test.dll"'
+    - echo "Tests complete"
+    - ''
+    - echo "Cleaning up Tests.."
+    - DEL /Q ".\Queste.Test\bin"
+    - echo "Tests cleaned"
   tags: 
   except:
-  - tags
+    - tags
