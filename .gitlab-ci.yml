@@ -62,7 +62,7 @@ deploy_job:
   - ''
   - 'cd .\Queste'
   - ''
-  - '"c:\nuget\nuget.exe" pack "Queste.csproj"'
+  - '"c:\nuget\nuget.exe" pack "Queste.csproj" -Prop Configuration=Release'
   - ''
   - 'echo NuGet Package deployed'
   - ''
