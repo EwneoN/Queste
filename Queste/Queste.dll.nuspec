@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Queste</id>
+    <version>$version$</version>
+    <authors>EwneoN</authors>
+    <owners>EwneoN</owners>
+    <licenseUrl>https://gitlab.com/EwneoN/Queste/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://gitlab.com/EwneoN/Queste</projectUrl>
+    <iconUrl>https://gitlab.com/uploads/project/avatar/1192303/queste.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A small library for converting query strings to linq Expression trees.</description>
+    <copyright>Copyright EwneoN 2016</copyright>
+    <tags>LINQ Expressions QueryString</tags>
+  </metadata>
+</package>
