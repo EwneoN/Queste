@@ -38,8 +38,5 @@ test_job:
     - echo Cleaning up..
     - DEL /Q "."
     - echo Tests cleaned
-  tags: 
-  except:
-    - tags
   when:
     - on_success
