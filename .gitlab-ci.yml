@@ -64,6 +64,7 @@ deploy_job:
   - ''
   - '"c:\nuget\nuget.exe" pack "Queste.csproj" -Prop Configuration=Release'
   - ''
+  - '"c:\nuget\nuget.exe" push Queste.*.nupkg -Source https://www.nuget.org/api/v2/package'
   - 'echo NuGet Package deployed'
   - ''
   - 'cd ..'
