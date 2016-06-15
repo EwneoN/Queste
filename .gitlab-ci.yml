@@ -7,24 +7,24 @@ build_job:
   script:
     - set MSBUILDDISABLENODEREUSE=1
     - ''
-    - "Restoring NuGet Packages..."
+    - echo Restoring NuGet Packages...
     - '"c:\nuget\nuget.exe" restore "Queste.sln"'
-    - "NuGet Packages restored"
+    - echo NuGet Packages restored
     - ''
-    - "Release build..."
+    - echo Release build...
     - '"C:\Program Files (x86)\MSBuild\14.0\Bin\msbuild.exe" /consoleloggerparameters:ErrorsOnly /maxcpucount /nologo /property:Configuration=Release /verbosity:quiet /m:4 /nr:false "Queste.sln"'
-    - "Build completed"
+    - echo Build completed
 
 test_job:
   stage: test
   script:
-    - "Running Tests..."
+    - echo Running Tests...
     - '"C:\xunit\xunit.console.exe" ".\Queste.Test\bin\Release\Queste.Test.dll"'
-    - "Tests complete"
+    - echo Tests complete
     - ''
-    - "Cleaning up Tests.."
+    - echo Cleaning up Tests..
     - DEL /Q ".\Queste.Test\bin"
-    - "Tests cleaned"
+    - echo Tests cleaned
   tags: 
   except:
     - tags
