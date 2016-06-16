@@ -34,8 +34,11 @@ namespace Queste
       //we get all the properties on TSource as we will try to match query string keys to property names
       Dictionary<string, PropertyInfo> properties = typeof(TSource).GetProperties().ToDictionary(p => p.Name.ToLower());
 
-      List<Expression> expressions = queryStringPairs.Cast<string>()
-        .SelectMany(key => queryStringPairs.GetValues(key), (key, value) => new KeyValuePair<string, string>(key.ToLower(), value))
+      Expression expression = null;
+
+      queryStringPairs.Cast<string>()
+        .SelectMany(key => queryStringPairs.GetValues(key), 
+                   (key, value) => new KeyValuePair<string, string>(key.ToLower(), value))
         .Select(kvp =>
         {
           PropertyInfo propertyInfo;
@@ -139,28 +142,23 @@ namespace Queste
           // (e.ToString() == values[0] || e.ToString() == values[1] || e.ToString() == values[2])
           return or;
         })
-        .Where(e => e != null)
-        .ToList();
-
-      switch (expressions.Count)
-      {
-        case 1:
-          return Expression.Lambda<Func<TSource, bool>>(expressions[0], parameter);
-
-        case 2:
-          Expression and = Expression.And(expressions[0], expressions[1]);
-          return Expression.Lambda<Func<TSource, bool>>(and, parameter);
-
-        default:
-          Expression ands = Expression.And(expressions.First(), expressions.Last());
-
-          for (int i = expressions.Count - 2; i > 0; i--)
+        .ForEach(e =>
+        {
+          if (e == null)
           {
-            ands = Expression.And(expressions[i], ands);
+            return;
           }
 
-          return Expression.Lambda<Func<TSource, bool>>(ands, parameter);
-      }
+          if (expression == null)
+          {
+            expression = e;
+            return;
+          }
+
+          expression = Expression.And(e, expression);
+        });
+
+      return Expression.Lambda<Func<TSource, bool>>(expression, parameter);
     }
 
     /// <summary>
@@ -179,34 +177,7 @@ namespace Queste
     #region Private Methods
 
     private static BinaryExpression BuildEqualExpression(Type type, string queryValue,
-      MemberExpression propertyExpression, MethodCallExpression toStringExpression)
-    {
-      Expression valueExpression;
-      Expression propertyValueExpression;
-
-      bool typeCanBeConst = type.GetInterface(nameof(IConvertible)) != null &&
-                            type.IsValueType || type == typeof(string);
-
-      if (typeCanBeConst)
-      {
-        object value = typeof(string) != type
-          ? Convert.ChangeType(queryValue, type)
-          : queryValue;
-
-        valueExpression = Expression.Constant(value);
-        propertyValueExpression = propertyExpression;
-      }
-      else
-      {
-        valueExpression = Expression.Constant(queryValue);
-        propertyValueExpression = toStringExpression;
-      }
-
-      return Expression.Equal(propertyValueExpression, valueExpression);
-    }
-
-    private static BinaryExpression BuildEqualExpression(Type type, string queryValue,
-      ParameterExpression parameterExpression, MethodCallExpression toStringExpression)
+      Expression parameterExpression, MethodCallExpression toStringExpression)
     {
       Expression valueExpression;
       Expression parameterValueExpression;

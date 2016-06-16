@@ -254,6 +254,47 @@ namespace Queste.Test
     [InlineData(10000)]
     [InlineData(100000)]
     [InlineData(1000000)]
+    public void GuidTest(int collectionSize)
+    {
+      var kvps = new KeyValuePair<string, Guid>[collectionSize];
+
+      Random rand = new Random();
+
+      for (int i = 0; i < collectionSize; i++)
+      {
+        kvps[i] = new KeyValuePair<string, Guid>($"key{i}", Guid.NewGuid());
+      }
+
+      Guid value1 = kvps[rand.Next(0, collectionSize - 1)].Value;
+      Guid value2 = kvps[rand.Next(0, collectionSize - 1)].Value;
+
+      string queryString = $"value={value1}%2B{value2}";
+
+      IQueryable<KeyValuePair<string, Guid>> queryable = kvps.AsQueryable();
+
+      var sw = Stopwatch.StartNew();
+      var expression = ExpressionBuilder.BuildExpression<KeyValuePair<string, Guid>>(queryString);
+
+      queryable.FirstOrDefault(expression).Should().NotBeNull().And
+        .Should().BeAnyOf(kvps.Where(kvp => kvp.Value == value1 || kvp.Value == value2));
+
+      queryable.Where(expression).Should().NotBeNullOrEmpty().And
+        .Contain(kvps.Where(kvp => kvp.Value == value1 || kvp.Value == value2));
+
+      queryable.Any(expression).Should().BeTrue();
+      queryable.All(expression).Should().BeFalse();
+      queryable.Count(expression).Should().Be(queryable.Count(q => q.Value == value1 || q.Value == value2));
+
+      sw.Stop();
+    }
+
+    [Theory]
+    [InlineData(10)]
+    [InlineData(100)]
+    [InlineData(1000)]
+    [InlineData(10000)]
+    [InlineData(100000)]
+    [InlineData(1000000)]
     public void StringTest(int collectionSize)
     {
       var kvps = new KeyValuePair<string, string>[collectionSize];

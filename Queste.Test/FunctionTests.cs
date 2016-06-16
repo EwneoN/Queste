@@ -244,6 +244,45 @@ namespace Queste.Test
     [InlineData(10000)]
     [InlineData(100000)]
     [InlineData(1000000)]
+    public void GuidTest(int collectionSize)
+    {
+      var kvps = new KeyValuePair<string, Guid>[collectionSize];
+
+      Random rand = new Random();
+
+      for (int i = 0; i < collectionSize; i++)
+      {
+        kvps[i] = new KeyValuePair<string, Guid>($"key{i}", Guid.NewGuid());
+      }
+
+      Guid value1 = kvps[rand.Next(0, collectionSize - 1)].Value;
+      Guid value2 = kvps[rand.Next(0, collectionSize - 1)].Value;
+
+      string queryString = $"value={value1}%2B{value2}";
+
+      var sw = Stopwatch.StartNew();
+      var expression = ExpressionBuilder.BuildFunction<KeyValuePair<string, Guid>>(queryString);
+
+      kvps.FirstOrDefault(expression).Should().NotBeNull().And
+        .Should().BeAnyOf(kvps.Where(kvp => kvp.Value == value1 || kvp.Value == value2));
+
+      kvps.Where(expression).Should().NotBeNullOrEmpty().And
+        .Contain(kvps.Where(kvp => kvp.Value == value1 || kvp.Value == value2));
+
+      kvps.Any(expression).Should().BeTrue();
+      kvps.All(expression).Should().BeFalse();
+      kvps.Count(expression).Should().Be(kvps.Count(q => q.Value == value1 || q.Value == value2));
+
+      sw.Stop();
+    }
+
+    [Theory]
+    [InlineData(10)]
+    [InlineData(100)]
+    [InlineData(1000)]
+    [InlineData(10000)]
+    [InlineData(100000)]
+    [InlineData(1000000)]
     public void StringTest(int collectionSize)
     {
       var kvps = new KeyValuePair<string, string>[collectionSize];
