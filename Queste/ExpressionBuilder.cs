@@ -158,7 +158,9 @@ namespace Queste
           expression = Expression.And(e, expression);
         });
 
-      return Expression.Lambda<Func<TSource, bool>>(expression, parameter);
+      return expression != null
+        ? Expression.Lambda<Func<TSource, bool>>(expression, parameter)
+        : null;
     }
 
     /// <summary>
