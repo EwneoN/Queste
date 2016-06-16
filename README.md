@@ -1,7 +1,9 @@
-Detailed instructions coming soon
+# Queste  
 
-Basic example:
+## Detailed instructions coming soon  
+### Basic example:  
 
+```C#
 var kvps = new []
 { 
 	new KeyValuePair<string, List<DateTime>>("key1", new List<DateTime> { new DateTime(2016,6,1) }),
@@ -10,6 +12,5 @@ var kvps = new []
 	new KeyValuePair<string, List<DateTime>>("key4", new List<DateTime> { new DateTime(2016,6,1), new DateTime(2016,6,2) }),
 };
 
-var expression = ExpressionBuilder.BuildFunction<KeyValuePair<string, List<DateTime>>>("?value=2016-06-2");
-
-kvps.Where(expression).Dump();
+kvps.Where("?value=2016-06-2");
+```
