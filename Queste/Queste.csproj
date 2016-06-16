@@ -47,7 +47,6 @@
     <Compile Include="Extensions\QuerableExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Shape.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Queste.dll.nuspec">
