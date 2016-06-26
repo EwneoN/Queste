@@ -16,7 +16,7 @@ namespace Queste
       return queryable.All(BuildExpression<TSource>(queryString));
     }
 
-    public static IEnumerable<TSource> Where<TSource>(this IQueryable<TSource> queryable, string queryString)
+    public static IQueryable<TSource> Where<TSource>(this IQueryable<TSource> queryable, string queryString)
     {
       return queryable.Where(BuildExpression<TSource>(queryString));
     }
