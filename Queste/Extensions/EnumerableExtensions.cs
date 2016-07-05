@@ -18,7 +18,7 @@ namespace Queste
 
     public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> enumerable, string queryString)
     {
-      return enumerable.Where(BuildFunction<TSource>(queryString));
+      return enumerable.Where(BuildFunction<TSource>(queryString)).ToList();
     }
 
     public static TSource First<TSource>(this IEnumerable<TSource> enumerable, string queryString)

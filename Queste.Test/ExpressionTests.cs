@@ -328,5 +328,54 @@ namespace Queste.Test
 
       sw.Stop();
     }
+
+    [Theory]
+    [InlineData(10)]
+    [InlineData(100)]
+    [InlineData(1000)]
+    [InlineData(10000)]
+    [InlineData(100000)]
+    [InlineData(1000000)]
+    public void ShapeTest(int collectionSize)
+    {
+      Random rand1 = new Random();
+      Random rand2 = new Random(rand1.Next(0, int.MaxValue));
+
+      List<Shape> shapes = new List<Shape>();
+
+      for (int i = 0; i < collectionSize; i++)
+      {
+        if(i % 2 == 1)
+        {
+          shapes.Add(new Circle(i % 3 == 0 ? Colour.Blue : Colour.Green, rand2.Next()));
+        }
+        else
+        {
+          shapes.Add(new Rectangle(i % 3 == 0 ? Colour.Blue : Colour.Green, rand2.Next(), rand2.Next()));
+        }
+      }
+
+      Shape value1 = shapes[rand1.Next(0, collectionSize - 1)];
+      Shape value2 = shapes[rand1.Next(0, collectionSize - 1)];
+
+      string queryString = $"Area={value1.Area}%2B{value2.Area}";
+
+      IQueryable<Shape> queryable = shapes.AsQueryable();
+
+      var sw = Stopwatch.StartNew();
+      var expression = ExpressionBuilder.BuildExpression<Shape>(queryString);
+
+      queryable.FirstOrDefault(expression).Should().NotBeNull().And
+        .Should().BeAnyOf(shapes.Where(kvp => kvp.Area == value1.Area || kvp.Area == value2.Area));
+
+      queryable.Where(expression).Should().NotBeNullOrEmpty().And
+        .Contain(shapes.Where(shape => shape.Area == value1.Area || shape.Area == value2.Area));
+
+      queryable.Any(expression).Should().BeTrue();
+      queryable.All(expression).Should().BeFalse();
+      queryable.Count(expression).Should().Be(queryable.Count(q => q.Area == value1.Area || q.Area == value2.Area));
+
+      sw.Stop();
+    }
   }
 }

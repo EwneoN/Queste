@@ -42,7 +42,7 @@ namespace Queste.Test
 
       for (int i = 0; i < collectionSize; i++)
       {
-        kvps[i] = new KeyValuePair<string, string>($"key{i}", Guid.NewGuid().ToString() + Guid.NewGuid() + Guid.NewGuid());
+        kvps[i] = new KeyValuePair<string, string>($"key{i}", $"{Guid.NewGuid()}{Guid.NewGuid()}{Guid.NewGuid()}");
       }
 
       string value1 = kvps[rand1.Next(0, collectionSize - 1)].Value;
@@ -99,7 +99,7 @@ namespace Queste.Test
 
       for (int i = 0; i < collectionSize; i++)
       {
-        kvps[i] = new KeyValuePair<string, string>($"key{i}", Guid.NewGuid().ToString() + Guid.NewGuid() + Guid.NewGuid());
+        kvps[i] = new KeyValuePair<string, string>($"key{i}", $"{Guid.NewGuid()}{Guid.NewGuid()}{Guid.NewGuid()}");
       }
 
       string value1 = kvps[rand1.Next(0, collectionSize - 1)].Value;

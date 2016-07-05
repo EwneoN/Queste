@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Web;
+using static System.Linq.Expressions.Expression;
 
 namespace Queste
 {
@@ -29,16 +30,17 @@ namespace Queste
       queryString = queryString.Replace("+", "%2B");
 
       NameValueCollection queryStringPairs = HttpUtility.ParseQueryString(queryString);
-      ParameterExpression parameter = Expression.Parameter(typeof(TSource), "p");
+      ParameterExpression parameter = Parameter(typeof(TSource), "p");
 
       //we get all the properties on TSource as we will try to match query string keys to property names
-      Dictionary<string, PropertyInfo> properties = typeof(TSource).GetProperties().ToDictionary(p => p.Name.ToLower());
+      Dictionary<string, PropertyInfo> properties = typeof(TSource).GetProperties()
+        .ToDictionary(p => p.Name.ToLower());
 
       Expression expression = null;
 
       queryStringPairs.Cast<string>()
-        .SelectMany(key => queryStringPairs.GetValues(key), 
-                   (key, value) => new KeyValuePair<string, string>(key.ToLower(), value))
+        .SelectMany(key => queryStringPairs.GetValues(key),
+          (key, value) => new KeyValuePair<string, string>(key.ToLower(), value))
         .Select(kvp =>
         {
           PropertyInfo propertyInfo;
@@ -55,8 +57,8 @@ namespace Queste
 
           BinaryExpression or;
           BinaryExpression[] equalsArray;
-          MemberExpression property = Expression.Property(parameter, propertyInfo);
-          MethodCallExpression propertyToString = Expression.Call(property, nameof(ToString), null, null);
+          MemberExpression property = Property(parameter, propertyInfo);
+          MethodCallExpression propertyToString = Call(property, nameof(ToString), null, null);
 
           Type[] propertyInterfaces = propertyType.GetInterfaces();
           Func<Type, bool> isIEnumerableFunc = i => i.IsGenericType &&
@@ -64,7 +66,8 @@ namespace Queste
 
           // see if this propety is of type IEnumerable<> and if it is we will loop through its values 
           // for comparison with query string value items
-          if (propertyInterfaces.Any(isIEnumerableFunc) && typeof(string) != propertyType)
+          if (propertyInterfaces.Any(isIEnumerableFunc) &&
+              typeof(string) != propertyType)
           {
             Type iEnumerableType = propertyInterfaces.FirstOrDefault(isIEnumerableFunc);
             Type itemType = iEnumerableType?.GetGenericArguments()[0];
@@ -72,23 +75,27 @@ namespace Queste
             //if for whatever reason we have failed to get an element type just return null
             if (itemType == null)
             {
-              return (Expression)null;
+              return (Expression) null;
             }
 
             //create a parameter expression for value items
             //also create a ToString call expression for this param expression
-            ParameterExpression item = Expression.Parameter(itemType, "e");
-            MethodCallExpression itemToString = Expression.Call(item, nameof(ToString), null, null);
+            ParameterExpression item = Parameter(itemType, "e");
+            MethodCallExpression itemToString = Call(item, nameof(ToString), null, null);
+
+            var propertyNotNullExpression = NotEqual(property, Constant(null));
 
             //get our func type ready using the value item type
             var func = typeof(Func<,>).MakeGenericType(itemType, typeof(bool));
 
             if (values.Length == 1)
             {
+              BinaryExpression equals = BuildEqualExpression(itemType, values[0], item, itemToString);
+
               // .Any(e => e == values[0]) 
               // .Any(e => e.ToString() == values[0])
-              return Expression.Call(typeof(Enumerable), nameof(Enumerable.Any), new[] { itemType }, property,
-                Expression.Lambda(func, BuildEqualExpression(itemType, values[0], item, itemToString), item));
+              return AndAlso(propertyNotNullExpression, Call(typeof(Enumerable), nameof(Enumerable.Any), 
+                new[] { itemType }, property, Lambda(func, equals, item)));
             }
 
             // e == values[0]
@@ -99,19 +106,19 @@ namespace Queste
 
             // (e == values[0] || e == value[1])
             // (e.ToString() == values[0] || e.ToString() == values[1])
-            or = Expression.Or(equalsArray.First(), equalsArray.Last());
+            or = Or(equalsArray.First(), equalsArray.Last());
 
             for (int i = equalsArray.Length - 2; i > 0; i--)
             {
               // (e == values[0] || e == values[1] || e == values[2])
               // (e.ToString() == values[0] || e.ToString() == values[1] || e.ToString() == values[2])
-              or = Expression.Or(equalsArray[i], or);
+              or = Or(equalsArray[i], or);
             }
 
             // .Any(e == values[0] || e == values[1] || e == values[2])
             // .Any(e.ToString() == values[0] || e.ToString() == values[1] || e.ToString() == values[2])
-            return Expression.Call(typeof(Enumerable), nameof(Enumerable.Any), new[] { itemType }, property,
-              Expression.Lambda(func, or, item));
+            return AndAlso(propertyNotNullExpression, Call(typeof(Enumerable), nameof(Enumerable.Any), 
+              new[] { itemType }, property, Lambda(func, or, item)));
           }
 
           if (values.Length == 1)
@@ -129,13 +136,13 @@ namespace Queste
 
           // (e == values[0] || e == value[1])
           // (e.ToString() == values[0] || e.ToString() == values[1])
-          or = Expression.Or(equalsArray.First(), equalsArray.Last());
+          or = Or(equalsArray.First(), equalsArray.Last());
 
           for (int i = equalsArray.Length - 2; i > 0; i--)
           {
             // (e == values[0] || e == values[1] || e == values[2])
             // (e.ToString() == values[0] || e.ToString() == values[1] || e.ToString() == values[2])
-            or = Expression.Or(equalsArray[i], or);
+            or = Or(equalsArray[i], or);
           }
 
           // (e == values[0] || e == values[1] || e == values[2])
@@ -155,11 +162,11 @@ namespace Queste
             return;
           }
 
-          expression = Expression.And(e, expression);
+          expression = And(e, expression);
         });
 
       return expression != null
-        ? Expression.Lambda<Func<TSource, bool>>(expression, parameter)
+        ? Lambda<Func<TSource, bool>>(expression, parameter)
         : null;
     }
 
@@ -182,25 +189,30 @@ namespace Queste
       Expression parameterExpression, MethodCallExpression toStringExpression)
     {
       Expression valueExpression;
-      Expression parameterValueExpression;
 
       bool typeCanBeConst = type.GetInterface(nameof(IConvertible)) != null &&
                             type.IsValueType || type == typeof(string);
 
       if (typeCanBeConst)
       {
-        valueExpression = Expression.Constant(typeof(string) != type
-          ? Convert.ChangeType(queryValue, type)
+        valueExpression = Constant(typeof(string) != type
+          ? System.Convert.ChangeType(queryValue, type)
           : queryValue);
-        parameterValueExpression = parameterExpression;
-      }
-      else
-      {
-        valueExpression = Expression.Constant(queryValue);
-        parameterValueExpression = toStringExpression;
+
+        return Equal(parameterExpression, valueExpression);
       }
 
-      return Expression.Equal(parameterValueExpression, valueExpression);
+      valueExpression = Constant(queryValue);
+
+      if (type.IsValueType)
+      {
+        return Equal(toStringExpression, valueExpression);
+      }
+
+      Expression nullExpression = Constant(null);
+
+      return AndAlso(NotEqual(parameterExpression, nullExpression),
+        Equal(toStringExpression, valueExpression));
     }
 
     #endregion
