@@ -41,18 +41,18 @@ namespace Queste.Test
     [InlineData("name=something")]
     [InlineData("=")]
     [InlineData("=")]
-    public void ExpressionShouldReturnNull2(string queryString)
+    public void ExpressionShouldNotReturnNull2(string queryString)
     {
-      ExpressionBuilder.BuildExpression<KeyValuePair<string, DateTime>>(queryString).Should().BeNull();
+      ExpressionBuilder.BuildExpression<KeyValuePair<string, DateTime>>(queryString).Should().NotBeNull();
     }
 
     [Theory]
     [InlineData("name=something")]
     [InlineData("=")]
     [InlineData("=")]
-    public void FunctionShouldReturnNull2(string queryString)
+    public void FunctionShouldNotReturnNull2(string queryString)
     {
-      ExpressionBuilder.BuildFunction<KeyValuePair<string, DateTime>>(queryString).Should().BeNull();
+      ExpressionBuilder.BuildFunction<KeyValuePair<string, DateTime>>(queryString).Should().NotBeNull();
     }
   }
 }
