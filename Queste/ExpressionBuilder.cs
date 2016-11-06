@@ -167,7 +167,7 @@ namespace Queste
 
       return expression != null
         ? Lambda<Func<TSource, bool>>(expression, parameter)
-        : p => true;
+        : p => false;
     }
 
     /// <summary>
