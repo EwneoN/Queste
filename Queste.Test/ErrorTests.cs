@@ -17,9 +17,9 @@ namespace Queste.Test
     [InlineData("      \n")]
     [InlineData("      \r\n")]
     [InlineData(null)]
-    public void ExpressionShouldReturnNull1(string queryString)
+    public void ExpressionShouldNotReturnNull1(string queryString)
     {
-      ExpressionBuilder.BuildExpression<KeyValuePair<string, DateTime>>(queryString).Should().BeNull();
+      ExpressionBuilder.BuildExpression<KeyValuePair<string, DateTime>>(queryString).Should().NotBeNull();
     }
 
     [Theory]
@@ -32,9 +32,9 @@ namespace Queste.Test
     [InlineData("      \n")]
     [InlineData("      \r\n")]
     [InlineData(null)]
-    public void FunctionShouldReturnNull1(string queryString)
+    public void FunctionShouldNotReturnNull1(string queryString)
     {
-      ExpressionBuilder.BuildFunction<KeyValuePair<string, DateTime>>(queryString).Should().BeNull();
+      ExpressionBuilder.BuildFunction<KeyValuePair<string, DateTime>>(queryString).Should().NotBeNull();
     }
 
     [Theory]

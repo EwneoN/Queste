@@ -23,7 +23,7 @@ namespace Queste
     {
       if (string.IsNullOrWhiteSpace(queryString))
       {
-        return null;
+        return p => false;
       }
 
       queryString = queryString.Replace("%3d", "=");
