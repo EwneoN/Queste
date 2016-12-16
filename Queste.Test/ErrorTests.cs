@@ -54,5 +54,27 @@ namespace Queste.Test
     {
       ExpressionBuilder.BuildFunction<KeyValuePair<string, DateTime>>(queryString).Should().NotBeNull();
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("name=something")]
+    [InlineData("name=something&")]
+    [InlineData("=")]
+    [InlineData("=")]
+    public void ExpressionShouldNotThrow(string queryString)
+    {
+      ((Action)(() => ExpressionBuilder.BuildExpression<KeyValuePair<string, DateTime>>(queryString))).ShouldNotThrow();
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("name=something")]
+    [InlineData("name=something&")]
+    [InlineData("=")]
+    [InlineData("=")]
+    public void FunctionShouldNotThrow(string queryString)
+    {
+      ((Action)(() => ExpressionBuilder.BuildFunction<KeyValuePair<string, DateTime>>(queryString))).ShouldNotThrow();
+    }
   }
 }

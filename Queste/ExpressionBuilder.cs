@@ -39,6 +39,7 @@ namespace Queste
       Expression expression = null;
 
       queryStringPairs.Cast<string>()
+       .Where(key => key != null && (queryStringPairs.GetValues(key)?.Length ?? 0) > 0)
         .SelectMany(key => queryStringPairs.GetValues(key),
           (key, value) => new KeyValuePair<string, string>(key.ToLower(), value))
         .Select(kvp =>
