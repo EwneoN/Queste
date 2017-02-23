@@ -81,6 +81,7 @@
     <Compile Include="Shape.cs" />
     <Compile Include="Rectangle.cs" />
     <Compile Include="ShapeCollection.cs" />
+    <Compile Include="StringCasingTests.cs" />
     <Compile Include="SubTestModels.cs" />
     <Compile Include="TestModel.cs" />
     <Compile Include="TokenTests.cs" />

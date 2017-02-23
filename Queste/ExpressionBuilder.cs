@@ -189,31 +189,46 @@ namespace Queste
     private static BinaryExpression BuildEqualExpression(Type type, string queryValue,
       Expression parameterExpression, MethodCallExpression toStringExpression)
     {
-      Expression valueExpression;
+      ConstantExpression valueExpression;
 
       bool typeCanBeConst = type.GetInterface(nameof(IConvertible)) != null &&
                             type.IsValueType || type == typeof(string);
 
       if (typeCanBeConst)
       {
-        valueExpression = Constant(typeof(string) != type
+        bool isNotString = typeof(string) != type;
+
+        valueExpression = Constant(isNotString
           ? System.Convert.ChangeType(queryValue, type)
           : queryValue);
 
-        return Equal(parameterExpression, valueExpression);
+        return isNotString 
+          ? Equal(parameterExpression, valueExpression)
+          : BuildStringEqualExpression(parameterExpression, valueExpression);
       }
 
       valueExpression = Constant(queryValue);
 
       if (type.IsValueType)
       {
-        return Equal(toStringExpression, valueExpression);
+        return BuildStringEqualExpression(toStringExpression, valueExpression);
       }
 
       Expression nullExpression = Constant(null);
 
       return AndAlso(NotEqual(parameterExpression, nullExpression),
-        Equal(toStringExpression, valueExpression));
+        BuildStringEqualExpression(toStringExpression, valueExpression));
+    }
+
+    private static BinaryExpression BuildStringEqualExpression(Expression parameterExpression,
+                                                               ConstantExpression valueExpression)
+    {
+      var stringEquals = typeof(string).GetMethod(nameof(Equals), new [] { typeof(string), typeof(string), typeof(StringComparison) });
+      var ordinalEnum = Constant(StringComparison.OrdinalIgnoreCase);
+      var trueVal = Constant(true);
+      MethodCallExpression stringEqualsCall = Call(stringEquals, parameterExpression, valueExpression, ordinalEnum);
+      
+      return Equal(stringEqualsCall, trueVal);
     }
 
     #endregion
