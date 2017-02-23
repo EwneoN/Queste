@@ -60,7 +60,7 @@ public static class Program
 	}
 }
 ```
-### Example 2
+### Example 3
 
 ```C#
 //this example uses EF 6
