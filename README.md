@@ -59,7 +59,7 @@ public static class Program
 		//squircle.Dump("squircle");
 	}
 }
-
+```
 ### Example 2
 
 ```C#
