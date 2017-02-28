@@ -64,54 +64,59 @@ public static class Program
 
 ```C#
 //this example uses EF 6
+//you will sort out how to connect to an SQL server yourself
 
 [Table(nameof(Animal))]
 public class Animal
 {
-  [Key]
-  public Guid Id { get; set; }
-	public string Name { get; set; }
-	public int Weight { get; set; }
-	public int Age { get; set; }
+    [Key]
+    public Guid Id { get; set; }
+    public string Name { get; set; }
+    public int Weight { get; set; }
+    public int Age { get; set; }
 
-	public Animal(int weight, int age, string name = null)
-	{
-		Weight = weight;
-		Age = age;
-		Name = name;
-	}
+    public Animal(int weight, int age, string name = null)
+    {
+        Id = Guid.NewGuid();
+        Weight = weight;
+    	Age = age;
+    	Name = name;
+    }
 }
 
 public AnimalDbContext: DbContext
 {
-  public DbSet<Animal> Animals { get; set; }
+    public DbSet<Animal> Animals { get; set; }
 }
 
 public static class Program
 {
-	public static void Main(string[] args)
-	{
-		var animals = new[]
-		{
-			new Animal(10, 15, "Rufus"),
-			new Animal(20, 10, "Jerry"),
-			new Animal(40, 20, "Fido"),
-			new Animal(20, 10, "Nessy"),
-			new Animal(80, 5, "Freki"),
-			new Animal(80, 5, "Geri"),
-			new Animal(100, 5, "Russ")
-		};
-
-		var smallShapes = animals.Where("?weight=10+20");
-		var oldAnimals = animals.Where("?age=20+15");
-		var nessy = animals.FirstOrDefault("?name=nessy");
-		var wolves = animals.Where("?name=freki+geri+russ");
-
-		//uncomment if running in linqpad
-		//smallShapes.Dump("smallShapes");
-		//oldAnimals.Dump("oldAnimals");
-		//nessy.Dump("nessy");
-		//wolves.Dump("wolves");
-	}
+    public static void Main(string[] args)
+    {
+        using (AnimalDbContext context = new AnimalDbContext())
+        {
+            context.Animals.AddOrUpdate(a => a.Name,
+                new Animal(10, 15, "Rufus"),
+                new Animal(20, 10, "Jerry"),
+                new Animal(40, 20, "Fido"),
+                new Animal(20, 10, "Nessy"),
+                new Animal(80, 5, "Freki"),
+                new Animal(80, 5, "Geri"),
+                new Animal(100, 5, "Russ"));
+                
+            context.SaveChanges();
+                
+            var smallAnimals = context.Animals.Where("?weight=10+20");
+            var oldAnimals = context.Animals.Where("?age=20+15");
+            var nessy = context.Animals.FirstOrDefault("?name=nessy");
+            var wolves = context.Animals.Where("?name=freki+geri+russ");
+    
+            //uncomment if running in linqpad
+            //smallAnimals.Dump("smallAnimals");
+            //oldAnimals.Dump("oldAnimals");
+            //nessy.Dump("nessy");
+            //wolves.Dump("wolves");
+        }
+    }
 }
 ```
