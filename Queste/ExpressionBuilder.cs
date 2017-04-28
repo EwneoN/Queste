@@ -192,19 +192,21 @@ namespace Queste
       ConstantExpression valueExpression;
 
       bool typeCanBeConst = type.GetInterface(nameof(IConvertible)) != null &&
-                            type.IsValueType || type == typeof(string);
+                            type.IsValueType || type == typeof(string) || type == typeof(Guid);
 
       if (typeCanBeConst)
       {
-        bool isNotString = typeof(string) != type;
+        if (typeof(string) == type)
+        {
+          return BuildStringEqualExpression(parameterExpression, Constant(queryValue));
+        }
 
-        valueExpression = Constant(isNotString
-          ? System.Convert.ChangeType(queryValue, type)
-          : queryValue);
+        if (typeof(Guid) == type)
+        {
+          return Equal(parameterExpression, Constant(new Guid(queryValue)));
+        }
 
-        return isNotString 
-          ? Equal(parameterExpression, valueExpression)
-          : BuildStringEqualExpression(parameterExpression, valueExpression);
+        return Equal(parameterExpression, Constant(System.Convert.ChangeType(queryValue, type)));
       }
 
       valueExpression = Constant(queryValue);
@@ -219,6 +221,7 @@ namespace Queste
       return AndAlso(NotEqual(parameterExpression, nullExpression),
         BuildStringEqualExpression(toStringExpression, valueExpression));
     }
+
 
     private static BinaryExpression BuildStringEqualExpression(Expression parameterExpression,
                                                                ConstantExpression valueExpression)
