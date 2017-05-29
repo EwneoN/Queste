@@ -11,6 +11,8 @@ namespace Queste
 {
   public static class ExpressionBuilder
   {
+    public static bool CaseSensitive = false;
+
     #region Public Methods
 
     /// <summary>
@@ -223,11 +225,16 @@ namespace Queste
     private static BinaryExpression BuildStringEqualExpression(Expression parameterExpression,
                                                                ConstantExpression valueExpression)
     {
-      var stringEquals = typeof(string).GetMethod(nameof(Equals), new [] { typeof(string), typeof(string), typeof(StringComparison) });
+      if (CaseSensitive)
+      {
+        return Equal(parameterExpression, valueExpression);
+      }
+
+      var stringEquals = typeof(string).GetMethod(nameof(Equals), new[] { typeof(string), typeof(string), typeof(StringComparison) });
       var ordinalEnum = Constant(StringComparison.OrdinalIgnoreCase);
       var trueVal = Constant(true);
       MethodCallExpression stringEqualsCall = Call(stringEquals, parameterExpression, valueExpression, ordinalEnum);
-      
+
       return Equal(stringEqualsCall, trueVal);
     }
 

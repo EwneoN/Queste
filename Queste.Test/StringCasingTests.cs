@@ -26,6 +26,8 @@ namespace Queste.Test
     [InlineData("VALUE", "VALUE", "VALUE", "value")]
     public void Test1(string searchKey, string searchValue, string key, string value)
     {
+      ExpressionBuilder.CaseSensitive = false;
+
       Dictionary<string, string> strings = new Dictionary<string, string>
       {
         [key] = value
